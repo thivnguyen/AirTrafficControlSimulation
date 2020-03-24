@@ -18,7 +18,7 @@ public class Airplane {
 	private int generateDirectDist() {
 		Random randomGen = new Random();
 		//generates random integer from 3000 - 20,000
-		return randomGen.nextInt(17001) + 3000; 
+		return randomGen.nextInt(17001) + 3000;
 	}
 	
 	private int generateElevation(){
@@ -44,7 +44,7 @@ public class Airplane {
 	}
 	
 	public int  calcAC (int directDist, int elevation) {
-		return 15000 - directDist + elevation;
+		return 15000 - (directDist + elevation)/2;
 	}
 	
 }
