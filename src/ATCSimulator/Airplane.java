@@ -15,6 +15,11 @@ public class Airplane {
 		AC = calcAC (directDist, elevation);
 	}
 
+	public Airplane(String flightNum, int AC) {
+		this.flightNum = flightNum;
+		this.AC = AC;
+	}
+
 	private int generateDirectDist() {
 		Random randomGen = new Random();
 		//generates random integer from 3000 - 20,000

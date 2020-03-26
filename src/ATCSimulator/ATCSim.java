@@ -6,6 +6,26 @@ import java.util.Scanner;
 public class ATCSim {
 
 	private ArrayList<Airplane> airplanes;
+	private ArrayList<Airplane> airplanesHeap;
+
+	public ATCSim (int numAirplane){
+		airplanes = new ArrayList<Airplane>();
+		airplanes.add (new Airplane("A",1));
+		airplanes.add(new Airplane ("B", 10));
+		airplanes.add(new Airplane ("C" , 13));
+		airplanes.add(new Airplane ("D",15));
+		airplanes.add(new Airplane ("E",2));
+		airplanes.add(new Airplane ("F",26));
+		airplanes.add(new Airplane ("G", 5));
+		airplanes.add(new Airplane ("H",6));
+		airplanes.add(new Airplane ("I",7));
+		airplanes.add(new Airplane ("J",4));
+		airplanes.add(new Airplane ("K",8));
+		airplanes.add(new Airplane ("L",20));
+		airplanes.add(new Airplane ("M",25));
+		airplanes.add(new Airplane ("N",23));
+		airplanes.add(new Airplane ("O",3));
+	}
 
 	public ATCSim() {
 		//have list of 30 airplanes
@@ -40,6 +60,7 @@ public class ATCSim {
 		airplanes.add (new Airplane("NK515"));
 		airplanes.add (new Airplane("B628"));
 		airplanes.add (new Airplane("WN3317"));
+		airplanesHeap = buildMaxHeap (airplanes);
 	}
 
 	public ArrayList<Airplane> getAirplaneList(){
@@ -98,31 +119,52 @@ public class ATCSim {
 		return copy;
 	}
 	public ArrayList<Airplane> maxHeapify(ArrayList<Airplane> airplaneList, int i) {
+
 		ArrayList<Airplane> planeList = copyList (airplaneList);
+		boolean done = false;
+
 		int left = getLeft(i);
 		int right = getRight (i);
 		int largest = 0;
-		if (left < getHeapSize(planeList) && planeList.get(left).getAC() > planeList.get(i).getAC()) {
+
+		if (left < getHeapSize(planeList) - 1 && planeList.get(left).getAC() > planeList.get(i).getAC()) {
 			largest = left;
 		}
 		else {
 			largest = i;
 		}
-		if (right < getHeapSize(planeList) && planeList.get(right).getAC() > planeList.get(largest).getAC()) {
+		if (right <= getHeapSize(planeList) -1 && planeList.get(right).getAC() > planeList.get(largest).getAC()) {
 			largest = right;
 		}
 		if (largest != i) {
 			//swap
 			swap (planeList,i, largest);
-			maxHeapify (planeList, largest);
+			return maxHeapify (planeList, largest);
 		}
-		return planeList;
+		else {
+			return planeList;
+		}
+
 	}
 
-	public void buildMaxHeap (ArrayList<Airplane> planeList){
-		for (int i = getHeapSize(planeList) / 2; i > 0 ;i--){
-			maxHeapify (planeList, i);
+	public ArrayList<Airplane> buildMaxHeap (ArrayList<Airplane> planeList){
+		ArrayList<Airplane> airplaneHeap = copyList(planeList);
+		for (int i = getHeapSize(airplaneHeap) / 2 - 1; i >= 0 ;i--){
+			airplaneHeap = maxHeapify (airplaneHeap, i);
 		}
+		return airplaneHeap;
+	}
+
+	public ArrayList<Airplane> heapSort(ArrayList<Airplane> planeList){
+		ArrayList<Airplane> heap = buildMaxHeap (planeList);
+		ArrayList<Airplane> sorted = new ArrayList<>();
+		for (int i = heap.size()-1; i >= 0; i--) {
+			swap (heap, 0, i);
+			sorted.add(heap.get(i));
+			heap.remove (i);
+			heap = maxHeapify(heap, 0);
+		}
+		return sorted;
 	}
 
 	public static void main(String[] args) {
@@ -136,6 +178,13 @@ public class ATCSim {
 		Scanner scan = new Scanner (System.in);
 		int choice = scan.nextInt();
 
+		switch (choice){
+			case 1:
+				simulator.userEnter();
+
+			case 2:
+				simulator.printAirplaneList(simulator.heapSort(simulator.getAirplaneList()));
+		}
 
 		scan.close();
 	}
