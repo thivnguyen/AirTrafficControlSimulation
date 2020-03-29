@@ -51,5 +51,8 @@ public class Airplane {
 	public int  calcAC (int directDist, int elevation) {
 		return 15000 - (directDist + elevation)/2;
 	}
-	
+
+	public void setAC (int newAC){
+		AC = newAC;
+	}
 }

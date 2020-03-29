@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class ATCSim {
 
 	private ArrayList<Airplane> airplanes;
-	private ArrayList<Airplane> airplanesHeap;
+	private ArrayList<Airplane> airplanesMaxHeap;
 
 	public ATCSim (int numAirplane){
 		airplanes = new ArrayList<Airplane>();
@@ -60,26 +60,76 @@ public class ATCSim {
 		airplanes.add (new Airplane("NK515"));
 		airplanes.add (new Airplane("B628"));
 		airplanes.add (new Airplane("WN3317"));
-		airplanesHeap = buildMaxHeap (airplanes);
+		airplanesMaxHeap = buildMaxHeap (airplanes);
 	}
 
 	public ArrayList<Airplane> getAirplaneList(){
 		return airplanes;
 	}
 
-	public void userEnter() {
+	public void userEnterFN() {
 		Scanner scan = new Scanner (System.in);
+		System.out.println ("Please enter a Flight Number: ");
 		String flightNum = scan.nextLine();
-		airplanes.add(new Airplane(flightNum));
+		Airplane newAirplane = new Airplane(flightNum);
+		airplanes.add(newAirplane);
 		scan.close();
+		System.out.println ("Please enter a Flight Number: ");
+		System.out.println("Airplane with the following information: ");
+		printAirplaneInfo(newAirplane);
+		System.out.println("has been successfully added to the airplane list!");
+
+
 	}
-	
+
+	public void userIncreaseAC(){
+		printAirplaneList (airplanesMaxHeap);
+		Scanner scan = new Scanner (System.in);
+		System.out.println ("Please enter the position number of the plane: ");
+		int index = scan.nextInt();
+		Airplane toIncrease = airplanesMaxHeap.get(index);
+		System.out.println ("Please enter a new AC value. Make sure the new AC is greater than current AC value (: " +
+				toIncrease.getAC() + ") and the AC of the plae before it in queue ("
+				+ airplanesMaxHeap.get(getParent(index)).getAC() + "):");
+		int newAC = scan.nextInt();
+
+		int oldAC = airplanesMaxHeap.get(index).getAC();
+
+		try{
+			heapIncreaseKey(index,newAC);
+		}
+		catch (ATCSimException error){
+			error.printStackTrace();
+		}
+
+		int newIndex = airplanesMaxHeap.indexOf(toIncrease);
+		System.out.print ("Airplane at " + index + "with AC value of "+
+				oldAC + "will be moved up to position" + newIndex +
+				"after increasing the value to " + airplanesMaxHeap.get(newIndex).getAC());
+
+	}
+
+	public void printAirplaneInfo(Airplane a){
+		System.out.println("(" + a.getFlightNum() +", D:" + a.getDirectDist() +
+				" meters, H:" + a.getElevation() + " meters) - AC: "+ a.getAC());
+	}
+
 	public void printAirplaneList (ArrayList<Airplane> planeList) {
 		int counter = 1; 
 		for (Airplane a: planeList) {
-			System.out.println(counter + ". (" + a.getFlightNum() +", D:" + a.getDirectDist() +
-					" meters, H:" + a.getElevation() + " meters) - AC: "+ a.getAC());
-			counter ++;
+			System.out.print(counter + ".");
+			printAirplaneInfo (a);
+			counter++;
+		}
+	}
+
+	public void printAirplaneListBackwards (ArrayList<Airplane> planeList) {
+		int counter = 1;
+		for (int i = planeList.size()-1; i>= 0; i--) {
+			Airplane a = planeList.get (i);
+			System.out.print(counter + ".");
+			printAirplaneInfo (a);
+			counter++;
 		}
 	}
 	
@@ -158,34 +208,102 @@ public class ATCSim {
 	public ArrayList<Airplane> heapSort(ArrayList<Airplane> planeList){
 		ArrayList<Airplane> heap = buildMaxHeap (planeList);
 		ArrayList<Airplane> sorted = new ArrayList<>();
-		for (int i = heap.size()-1; i >= 0; i--) {
-			swap (heap, 0, i);
-			sorted.add(heap.get(i));
-			heap.remove (i);
+		for (int i = heap.size()-1; i > 0; i--) {
+			swap (heap, 0, heap.size()-1);
+
+			//simulate switching first and ith element
+			sorted.add(0,heap.get(heap.size()-1));
+			heap.remove (heap.size()-1);
 			heap = maxHeapify(heap, 0);
 		}
 		return sorted;
+//		for (int i = heap.size()-1; i > 0; i--) {
+//			swap (heap, 0, i); //exchange first and ith element
+//
+//			//simulate switching first and ith element
+//			//sorted.add(0,heap.get(heap.size()-1));
+//			//heap.remove (heap.size()-1); //since we alr disregarding i
+//			ArrayList<Airplane> subList = (ArrayList<Airplane>) heap.subList (0, i + 1);
+//			heap = maxHeapify(subList, 0);
+//		}
+//		return sorted;
+	}
+
+	public Airplane HeapMaximum (){
+		return airplanesMaxHeap.get(0);
+	}
+
+	public Airplane heapExtractMax() throws ATCSimException{
+		if (getHeapSize(airplanesMaxHeap) < 1){
+			throw new ATCSimException("heap underflow");
+		}
+		Airplane maxPriority = airplanesMaxHeap.get(0);
+		airplanesMaxHeap.set(0, airplanesMaxHeap.get(airplanesMaxHeap.size()-1));
+		airplanesMaxHeap.remove (airplanesMaxHeap.size()-1);
+		maxHeapify(airplanesMaxHeap, 0);
+		return maxPriority;
+	}
+
+	public void heapIncreaseKey(int index, int newAC) throws ATCSimException{
+		Airplane plane = airplanesMaxHeap.get(index);
+		if (newAC < plane.getAC()){
+			throw new ATCSimException( "New AC value is too smaller tha current key!");
+		}
+		else if (newAC < getParent (index)){
+			throw new ATCSimException( "New AC value is not large enough to move Airplane up in priority queue!");
+		}
+		airplanesMaxHeap.get(index).setAC (newAC);
+		while (index > 0 && getParent(index) < plane.getAC()){
+			swap (airplanesMaxHeap, index, getParent(index));
+			index = getParent(index);
+		}
 	}
 
 	public static void main(String[] args) {
 
 		ATCSim simulator = new ATCSim();
+		Scanner scan = new Scanner(System.in);
+		boolean done = false;
 
-		System.out.println ("Please choose one of the following options by typing in the number from menu: ");
-		System.out.println ("1 -> Add an Airplane:");
-		System.out.println ("2 -> Display Sorted Result an Airplane:");
+			System.out.println("Please choose one of the following options by typing in the number from menu: ");
+			System.out.println("1 -> Add an Airplane:");
+			System.out.println("2 -> Display Landing Sequence of Airplanes:");
+			System.out.println("3 -> Insert new Airplane into the heap: ");
+			System.out.println("4 -> View Airplane first in queue to land: ");
+			System.out.println("5 -> Increase an airplane priority in queue");
 
-		Scanner scan = new Scanner (System.in);
-		int choice = scan.nextInt();
+			int choice = scan.nextInt();
 
-		switch (choice){
-			case 1:
-				simulator.userEnter();
 
-			case 2:
-				simulator.printAirplaneList(simulator.heapSort(simulator.getAirplaneList()));
-		}
+
+			switch (choice) {
+				case 1:
+					simulator.userEnterFN();
+					break;
+
+				case 2:
+					System.out.println("Airplanes Landing sequence: ");
+					simulator.printAirplaneListBackwards(simulator.heapSort(simulator.getAirplaneList()));
+					break;
+
+				case 3:
+
+					break;
+
+				case 4:
+					try {
+						simulator.heapExtractMax();
+					} catch (ATCSimException error) {
+						error.printStackTrace();
+					}
+
+				case 5:
+					simulator.userIncreaseAC();
+			}
+
+			System.out.println("Is there another action you want to take? \n Enter \"YES\" or \"NO\"");
 
 		scan.close();
 	}
+
 }
