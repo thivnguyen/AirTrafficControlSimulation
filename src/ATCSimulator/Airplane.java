@@ -7,7 +7,7 @@ public class Airplane {
 	private String flightNum;
 	private int directDist;
 	private int elevation;
-	
+
 	public Airplane(String flightNum) {
 		this.flightNum = flightNum;
 		directDist = generateDirectDist();
@@ -15,8 +15,11 @@ public class Airplane {
 		AC = calcAC (directDist, elevation);
 	}
 
-	public Airplane(String flightNum, int AC) {
-		this.flightNum = flightNum;
+	public Airplane(int AC) {
+		this.AC = AC;
+	}
+
+	public Airplane(String flightName, int AC) {
 		this.AC = AC;
 	}
 
@@ -52,7 +55,21 @@ public class Airplane {
 		return 15000 - (directDist + elevation)/2;
 	}
 
-	public void setAC (int newAC){
-		AC = newAC;
+	public void setAC (int AC){
+		this.AC = AC;
+	}
+
+	public void setACRand(){
+		directDist = generateDirectDist();
+		elevation = generateElevation();
+		elevation = generateElevation();
+		AC = calcAC (directDist, elevation);
+	}
+
+	public void setDirectDist(int directDist){
+		this.directDist = directDist;
+	}
+	public void setElevation (int elevation){
+		this.elevation = elevation;
 	}
 }

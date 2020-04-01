@@ -30,7 +30,7 @@ public class TestFunctions {
         //Test Heapsort
         System.out.println ("Testing heapsort....");
         System.out.println ("Original Airplane List:");
-        ATCSim sim3 = new ATCSim ();
+        ATCSim sim3 = new ATCSim (1);
 
         sim3.printAirplaneList(sim3.getAirplaneList());
 
