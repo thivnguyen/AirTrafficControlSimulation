@@ -30,7 +30,7 @@ public class TestFunctions {
         //Test Heapsort
         System.out.println ("Testing heapsort....");
         System.out.println ("Original Airplane List:");
-        ATCSim sim3 = new ATCSim (1);
+        ATCSim sim3 = new ATCSim ();
 
         sim3.printAirplaneList(sim3.getAirplaneList());
 
@@ -38,8 +38,9 @@ public class TestFunctions {
         System.out.println ("Airplane List after heapsort is called:");
         sim3.printAirplaneList(sorted);
 
-
-
+        for (int i = 0; i < 10; i++) {
+            System.out.println(sim3.generateFlightNum());
+        }
 
     }
 }

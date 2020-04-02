@@ -2,11 +2,13 @@ package ATCSimulator;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Random;
 
 public class ATCSim {
 
 	private ArrayList<Airplane> airplanes;
 	private ArrayList<Airplane> airplanesMaxHeap;
+	private ArrayList<Airplane> airplanesQueue;
 
 	public ATCSim (int numAirplane){
 		airplanes = new ArrayList<Airplane>();
@@ -30,37 +32,25 @@ public class ATCSim {
 	public ATCSim() {
 		//have list of 30 airplanes
 		airplanes = new ArrayList<Airplane>();
-		airplanes.add (new Airplane("AA890"));
-		airplanes.add (new Airplane("AA2892"));
-		airplanes.add (new Airplane("AA6081"));
-		airplanes.add (new Airplane("DL1845"));
-		airplanes.add (new Airplane("DL1011"));
-		airplanes.add (new Airplane("UA256"));
-		airplanes.add (new Airplane("UA433"));
-		airplanes.add (new Airplane("UA229"));
-		airplanes.add (new Airplane("WN4949"));
-		airplanes.add (new Airplane("WN3937"));
-		airplanes.add (new Airplane("WN2549"));
-		airplanes.add (new Airplane("F91044"));
-		airplanes.add (new Airplane("B61705"));
-		airplanes.add (new Airplane("NK550"));
-		airplanes.add (new Airplane("B652"));
-		airplanes.add (new Airplane("DL2323"));
-		airplanes.add (new Airplane("WN2442"));
-		airplanes.add (new Airplane("NK1130"));
-		airplanes.add (new Airplane("NK910"));
-		airplanes.add (new Airplane("F9679"));
-		airplanes.add (new Airplane("AS35"));
-		airplanes.add (new Airplane("AC1671"));
-		airplanes.add (new Airplane("US1546)"));
-		airplanes.add (new Airplane("B6252"));
-		airplanes.add (new Airplane("AA2015"));
-		airplanes.add (new Airplane("WN767"));
-		airplanes.add (new Airplane("DL2518"));
-		airplanes.add (new Airplane("NK515"));
-		airplanes.add (new Airplane("B628"));
-		airplanes.add (new Airplane("WN3317"));
+		for (int i = 1; i<= 30; i++){
+			airplanes.add (new Airplane (generateFlightNum()));
+		}
 		airplanesMaxHeap = buildMaxHeap (airplanes);
+		airplanesQueue = makePriorityQueue (airplanesMaxHeap);
+	}
+
+	public String generateFlightNum(){
+		Random rand = new Random();
+		String flightNum = "";
+		char firstLet = (char)(rand.nextInt(26) + 65);
+		char secondLet = (char)(rand.nextInt(26) + 65);
+		flightNum = ""+ firstLet + secondLet;
+		int numDigits = rand.nextInt(3)+ 2;// random int 2 -> 3
+		for (int i = 1; i<= numDigits; i++){
+			int randomInt = rand.nextInt(9) + 1;
+			flightNum = flightNum + randomInt;
+		}
+		return flightNum;
 	}
 
 	public ArrayList<Airplane> getAirplaneList(){
@@ -77,32 +67,64 @@ public class ATCSim {
 
 	}
 
+	public int findPlane (String flightNum, ArrayList<Airplane> plane){
+		for (int i = 0; i < plane.size(); i++){
+			Airplane a = plane.get(i);
+			if (a.getFlightNum() .equals (flightNum)){
+				return i;
+			}
+		}
+		return -1;
+	}
+
 	public void userIncreaseAC(){
 		ArrayList<Airplane> backward = listBackwards(heapSort(airplanes));
 		printAirplaneList (backward);
 		Scanner scan = new Scanner (System.in);
 		System.out.println ("Please enter the position number of the plane that you want to increase the priority of: ");
-		int index = scan.nextInt();
+		int number = scan.nextInt();
+		int index = number - 1;
 		Airplane toIncrease = backward.get(index);
+		boolean ACHighEnough = false;
+		int newAC = 0;
+		while (!ACHighEnough){
 		System.out.println ("Please enter a new AC value. Make sure the new AC is greater than current AC value (" +
-				toIncrease.getAC() + ") and the AC of the plae before it in queue ("
-				+ backward.get(getParent(index)).getAC() + "):");
-		int newAC = scan.nextInt();
+				toIncrease.getAC() + ") and the AC of the plane before it in queue ("
+				+ backward.get(index-1).getAC() + "):");
+		newAC = scan.nextInt();
+		if (newAC > toIncrease.getAC() && newAC > backward.get(index).getAC()){
+				ACHighEnough = true;
+			}
+		}
 
+		int indexInHeap = findPlane(backward.get(index).getFlightNum(), airplanesMaxHeap);
 		int oldAC = backward.get(index).getAC();
-
+		int newIndexHeap = 0;
 		try{
-			heapIncreaseKey(index,newAC);
+			newIndexHeap = heapIncreaseKey(indexInHeap,newAC);
 		}
 		catch (ATCSimException error){
 			error.printStackTrace();
 		}
 
-		int newIndex = backward.indexOf(toIncrease);
-		System.out.print ("Airplane at " + index + "with AC value of "+
-				oldAC + "will be moved up to position" + newIndex +
-				"after increasing the value to " + backward.get(newIndex).getAC());
+		int indexInQueue = findPlane (airplanesMaxHeap.get(newIndexHeap).getFlightNum(), backward); //since arraylist starts @ 0 and quque starts @ 1
+		System.out.println ("Airplane at " + number + " with AC value of "+
+				oldAC + " will be moved up to position " + indexInQueue +
+				" in priority queue after increasing the value to " + newAC);
 
+	}
+
+	public ArrayList<Airplane> makePriorityQueue(ArrayList<Airplane> planeList){
+		ArrayList<Airplane> queue = new ArrayList<Airplane>();
+		for (int i = 0; i < planeList.size(); i++){
+			try{
+				queue.add(heapExtractMax());
+			}
+			catch (ATCSimException error){
+				error.printStackTrace();
+			}
+		}
+		return queue;
 	}
 
 	public void printAirplaneInfo(Airplane a){
@@ -127,6 +149,7 @@ public class ATCSim {
 		}
 		return backwards;
 	}
+
 	public void printAirplaneListBackwards (ArrayList<Airplane> planeList) {
 		int counter = 1;
 		for (int i = planeList.size()-1; i>= 0; i--) {
@@ -141,8 +164,10 @@ public class ATCSim {
 		if (index == 0){
 			return 0;
 		}
-		return (int)Math.ceil((index/2)) - 1;
+		int difference = (int)Math.ceil((float)index/2);
+		return difference - 1;
 	}
+
 	private int getLeft(int index) {
 		return 2 * index + 1;
 	}
@@ -182,7 +207,7 @@ public class ATCSim {
 		int right = getRight (i);
 		int largest = 0;
 
-		if (left < getHeapSize(planeList) - 1 && planeList.get(left).getAC() > planeList.get(i).getAC()) {
+		if (left <= getHeapSize(planeList) - 1 && planeList.get(left).getAC() > planeList.get(i).getAC()) {
 			largest = left;
 		}
 		else {
@@ -221,7 +246,7 @@ public class ATCSim {
 	private ArrayList<Airplane> createSublist (ArrayList <Airplane> newList, ArrayList<Airplane> oldList, int start, int end) throws ATCSimException{
 		if (newList.size() == 0){
 			for (int i = start; i <= end; i++){
-				newList.add (oldList.get (i)); //copy from oldList and insert into beginning of newList
+				newList.add (oldList.get (i)); //copy from oldList and insert into newList
 			}
 		}
 		else if (newList.size() < end - start + 1){
@@ -229,7 +254,7 @@ public class ATCSim {
 		}
 		else{
 			for (int i = start; i <= end; i++){
-				newList.set (i, oldList.get (i)); //copy from oldList and insert into beginning of newList
+				newList.set (i, oldList.get (i)); //copy from oldList and replace values of newList
 			}
 		}
 		return newList;
@@ -239,7 +264,7 @@ public class ATCSim {
 		ArrayList<Airplane> heap = buildMaxHeap (planeList);
 		for (int i = heap.size()-1; i > 0; i--) {
 			swap (heap, 0, i);
-			ArrayList<Airplane> subList = new ArrayList<Airplane>(i);
+			ArrayList<Airplane> subList = new ArrayList<Airplane>();
 			try{
 			createSublist (subList, heap, 0, i-1);
 			subList = maxHeapify(subList, 0);
@@ -266,7 +291,7 @@ public class ATCSim {
 		return maxPriority;
 	}
 
-	public void heapIncreaseKey(int index, int newAC) throws ATCSimException{
+	public int heapIncreaseKey(int index, int newAC) throws ATCSimException{
 		Airplane plane = airplanesMaxHeap.get(index);
 		if (newAC < plane.getAC()){
 			throw new ATCSimException( "New AC value is too smaller tha current key!");
@@ -275,10 +300,13 @@ public class ATCSim {
 			throw new ATCSimException( "New AC value is not large enough to move Airplane up in priority queue!");
 		}
 		airplanesMaxHeap.get(index).setAC (newAC);
-		while (index > 0 && getParent(index) < plane.getAC()){
+		while (index > 0 && airplanesMaxHeap.get(getParent(index)).getAC() < plane.getAC()){
 			swap (airplanesMaxHeap, index, getParent(index));
-			index = getParent(index);
+
+				index = getParent(index);
+
 		}
+		return index;
 	}
 
 	//returns new index of airplane in heap
@@ -304,10 +332,11 @@ public class ATCSim {
 		boolean done = false;
 		while (!done) {
 			System.out.println("Please choose one of the following options by typing in the number from menu: ");
-			System.out.println("1 -> Add an Airplane to the list and heap:");
-			System.out.println("2 -> Display Landing Sequence of Airplanes:");
+			System.out.println("1 -> Display Landing Sequence of Airplanes:");
+			System.out.println("2 -> Add an Airplane to the list and heap: ");
 			System.out.println("3 -> View Airplane first in queue to land: ");
 			System.out.println("4 -> Increase an airplane priority in queue");
+			System.out.println("5 -> Land the first airplane in queue");
 
 			int choice = 0;
 			if (scan.hasNextInt()) {
@@ -316,16 +345,16 @@ public class ATCSim {
 
 			switch (choice) {
 				case 1:
+					System.out.println("Airplanes Landing sequence: ");
+					simulator.printAirplaneListBackwards(simulator.heapSort(simulator.getAirplaneList()));
+					break;
+
+				case 2:
 					System.out.println ("Please enter a Flight Number: ");
 					String flightNumber = scan.nextLine();
 					Airplane plane = new Airplane (flightNumber);
 					simulator.maxHeapInsert(plane);
 					simulator.addAirplane(plane);
-					break;
-
-				case 2:
-					System.out.println("Airplanes Landing sequence: ");
-					simulator.printAirplaneListBackwards(simulator.heapSort(simulator.getAirplaneList()));
 					break;
 
 				case 3:
@@ -341,16 +370,27 @@ public class ATCSim {
 					simulator.userIncreaseAC();
 			}
 
-			//scan.nextLine();
+			boolean correctResponse = false;
 			System.out.println("Is there another action you want to take? \n Enter \"YES\" or \"NO\"");
-			String response = "";
-			if (scan.hasNextLine()) {
-				response = scan.nextLine();
+			while (!correctResponse){
+				String response = "";
+				if (scan.hasNextLine()) {
+					response = scan.nextLine();
+				}
+				response = response.toUpperCase();
+				if (response .equals("NO")){
+					correctResponse = true;
+					done = true;
+					System.out.println ("Thank you. Simulation ends. Have a great day!");
+				}
+				else if (response .equals("YES")){
+					correctResponse = true;
+				}
+				else{
+					System.out.println ("Incorrect Input. Please make sure you are in teh correct format. Please enter \"YES\" or \"NO\"");
+				}
 			}
-			response = response.toUpperCase();
-			if (response .equals("NO")){
-				done = true;
-			}
+
 
 		}
 		scan.close();
