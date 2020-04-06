@@ -1,43 +1,45 @@
-package ATCSimulator;
+package ATCSimulation;
 
 import java.util.Random;
 
+/**
+ * Simulates a real-life airplane flying in the sky, keeping track of the airplane's flight number, direct distance to runway,
+ * elevation, and approach code
+ */
 public class Airplane {
-	private int AC;
-	private String flightNum;
-	private int directDist;
-	private int elevation;
+
+	private String flightNum; //flight number
+	private int directDist; //direct distance to runway in meters
+	private int elevation; //elevation in meters
+	private int AC; //approach code
 
 	/**
-	 * Creates an Airplane object with a given Flight Number
+	 * Creates an Airplane object with a given flight number
 	 * @param flightNum flight number of airplane
 	 */
 	public Airplane(String flightNum) {
 		this.flightNum = flightNum;
-		directDist = generateDirectDist();
-		elevation = generateElevation();
-		AC = calcAC (directDist, elevation);
+		directDist = generateDirectDist(); //set directDist to randomly generated direct distance value
+		elevation = generateElevation(); //set elevation to randomly generated elevation value
+		AC = calcAC (directDist, elevation); //calculate AC based on given formula
 	}
 
 	/**
-	 * Creates an Airplane object with a given Flight Number
+	 * Creates an Airplane object with a given approach code
 	 * @param AC approach code of Airplane
 	 */
 	public Airplane(int AC) {
-		this.AC = AC;
-	}
-
-	public Airplane(String flightName, int AC) {
+		//note that the direct distance, elevation, and flight number values are not set for this Airplane object
 		this.AC = AC;
 	}
 
 	/**
 	 * Generates a random direct distance value of airplane to runway in the range between 3000 - 20000
-	 * @return random direct distance of airplane to runway
+	 * @return random direct distance value of airplane to runway
 	 */
 	private int generateDirectDist() {
 		Random randomGen = new Random();
-		//generates random integer from 3000 - 20,000
+		//generates random integer from 3,000 - 20,000
 		return randomGen.nextInt(17001) + 3000;
 	}
 
@@ -47,7 +49,7 @@ public class Airplane {
 	 */
 	private int generateElevation(){
 		Random randomGen = new Random();
-		//generates random integer from 1000 - 3000
+		//generates random integer from 1,000 - 3,000
 		return randomGen.nextInt(2001) + 1000;
 	}
 
@@ -90,6 +92,7 @@ public class Airplane {
 	 * @return approach code (AC) of airplane
 	 */
 	public int  calcAC (int directDist, int elevation) {
+		//AC = 15,000 meters - (direct distance to runway in meter + Elevation in meter)/2
 		return 15000 - (directDist + elevation)/2;
 	}
 
@@ -102,26 +105,18 @@ public class Airplane {
 	}
 
 	/**
-	 * Prints the airplane's information in the format (Flight Number, direct distance, elevation) - AC: approach code
+	 * Sets new flight number for airplane
+	 * @param flightNum flight number that will replace airplane's current flight number
+	 */
+	public void setFlightNum (String flightNum){
+		this.flightNum = flightNum;
+	}
+	/**
+	 * Prints airplane's information in the format (flight number, direct distance, elevation) - AC: approach code
 	 */
 	public void printAirplaneInfo(){
 		System.out.println("(" + flightNum +", D:" + directDist +
 				" meters, H:" + elevation + " meters) - AC: "+ AC);
 	}
-
-//	public void setACRand(){
-//		directDist = generateDirectDist();
-//		elevation = generateElevation();
-//		elevation = generateElevation();
-//		AC = calcAC (directDist, elevation);
-//	}
-//
-//
-//	public void setDirectDist(int directDist){
-//		this.directDist = directDist;
-//	}
-//	public void setElevation (int elevation){
-//		this.elevation = elevation;
-//	}
 
 }
