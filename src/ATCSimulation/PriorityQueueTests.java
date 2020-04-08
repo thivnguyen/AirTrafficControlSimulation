@@ -148,6 +148,33 @@ public class PriorityQueueTests{
     }
 
     /**
+     * Create a Priority Queue given a maxheap with printed outputs
+     *
+     * @param maxHeap maxHeap that Priority Queue will be created from
+     * @return priority queue
+     */
+    public ArrayList<Airplane> makePriorityQueueP(ArrayList<Airplane> maxHeap) {
+
+        System.out.println();
+        //System.out.println ("Entering makePriorityQueue method");
+        ArrayList<Airplane> queue = new ArrayList<Airplane>();
+        int size = maxHeap.size();
+
+        //Keep extracting the first Node of the maxHeap util there is none left
+        // System.out.println("Will use heapExtractMax() to keep extracting the max node from the max heap and adding to queue");
+        for (int i = 0; i < size; i++) {
+            try {
+                Airplane extracted = heapExtractMaxNP(maxHeap);
+                System.out.println ("Extracting airplane with AC (" + extracted.getAC() + ") and adding to priority queue");
+                queue.add(extracted);
+            } catch (ATCSimException error) {
+                error.printStackTrace();
+            }
+        }
+        return queue;
+    }
+
+    /**
      * Print the Airplane List starting from 1
      *
      * @param planeList Airplane List to be printed
@@ -385,7 +412,7 @@ public class PriorityQueueTests{
     public void heapIncreaseKey(int index, Airplane plane) throws ATCSimException {
 
         System.out.println();
-        System.out.println("Entering Heap Increase Key() method");
+        System.out.println("Entering/Testing Heap Increase Key() method");
 
         Airplane airplane = airplanesQueue.get(index);
 
@@ -476,7 +503,6 @@ public class PriorityQueueTests{
         maximum.printAirplaneInfo();
 
 
-        //PriorityQueueTests sim2 = new PriorityQueueTests();
         System.out.println();
         System.out.println ("Testing maxHeapInsert()");
         Airplane newPlane = new Airplane ("HI132");
@@ -494,6 +520,7 @@ public class PriorityQueueTests{
             System.out.println("Please note that this method inserts the plane into the right location in the max heap, not the priority queue.\n Therefore, " +
                     "the airplanes are not ordered from greatest to smallest AC");
         }
+
 
     }
 }

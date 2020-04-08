@@ -111,6 +111,7 @@ public class Airplane {
 	public void setFlightNum (String flightNum){
 		this.flightNum = flightNum;
 	}
+
 	/**
 	 * Prints airplane's information in the format (flight number, direct distance, elevation) - AC: approach code
 	 */

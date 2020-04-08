@@ -177,7 +177,12 @@ public class ATCSim {
             System.out.println("Please enter a new AC value. Make sure the new AC is greater than current AC value (" +
                     toIncrease.getAC() + ") and the AC of the airplane before it in the queue ("
                     + airplanesQueue.get(index-1).getAC() + "):");
-            newAC = scan.nextInt();
+            try{
+                newAC = scan.nextInt();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
 
             //makes sure the new AC value is greater than the current AC value and greater than AC value of plane
             //before it in queue
@@ -495,7 +500,7 @@ public class ATCSim {
     public void emergencyLanding (){
         printAirplaneList(airplanesQueue); //prints airplane queue so user can see all airplanes currently in line to land
 
-        //allow users to choose airplane that they want to increase priority of
+        //allow users to choose airplane that they wan t to increase priority of
         Scanner scan = new Scanner(System.in);
         System.out.println("Please enter the position number of the plane that you want to increase the priority of: ");
         int numberInQueue = scan.nextInt();
@@ -526,6 +531,27 @@ public class ATCSim {
         toExtract.printAirplaneInfo();
     }
 
+    /**
+     * Lands the first airplane in queue
+     */
+    public void landFirstAirplane(){
+        try {
+            //extract the first airplane in queue
+            Airplane extracted = heapExtractMax(getAirplaneQueue());
+            airplanesQueue = makePriorityQueue(airplanesQueue);
+            //find the airplane in airplane list and remove it
+            int index = findPlane(extracted.getFlightNum(), getAirplaneList());
+            removeFromAirplaneList(index);
+
+            //print information of the plane that has been extrated
+            System.out.println("The following airplane has landed: ");
+            extracted.printAirplaneInfo();
+
+        } catch (ATCSimException error) {
+            error.printStackTrace();
+        }
+    }
+
     //user program
     public static void main(String[] args) {
 
@@ -536,10 +562,15 @@ public class ATCSim {
 
         //Print out menu that displays options users can choose from
         while (!done) {
+            System.out.println();
+            System.out.println ("Note: The airplanes in this program are printed in the following format:");
+            System.out.println ("(flight number, D: distance in meters, H:elevation in meters) - AC: approach code");
+            System.out.println();
+
             System.out.println("Please choose one of the following options by typing in the number from menu: ");
             System.out.println("1 -> Display Landing Sequence of Airplanes");
             System.out.println("2 -> Add an Airplane to the list and queue");
-            System.out.println("3 -> View first airplane in queue");
+            System.out.println("3 -> View first airplane in queue to land");
             System.out.println("4 -> Increase an airplane priority in queue");
 			System.out.println("5 -> Land the first Airplane in queue");
 			System.out.println("6 -> Emergency: Choose an airplane to land immediately");
@@ -561,7 +592,7 @@ public class ATCSim {
                     //Display Landing Sequence
                     case 1:
                     	legitChoice = true;
-                        System.out.println("Airplanes Landing sequence (sorted using Heapsort): ");
+                        System.out.println("Airplanes Landing sequence (sorted using Heapsort and printed backward): ");
 
                         //heapsort the list of airplanes and print the list in backwards order
                         simulator.printAirplaneListBackwards(simulator.heapsort(simulator.getAirplaneList()));
@@ -571,10 +602,17 @@ public class ATCSim {
                     case 2:
 						legitChoice = true;
 
+						boolean airplaneDoesNotExist = false;
 						//Have user enter a flight number
-                        System.out.println("Please enter a Flight Number: ");
-                        String flightNumber = scan.nextLine();
 
+                        String flightNumber = "";
+                        while (!airplaneDoesNotExist) {
+                            System.out.println("Please enter a Flight Number. Make Sure the Flight Number does not exist yet: ");
+                            flightNumber = scan.nextLine();
+                            if (simulator.findPlane(flightNumber, simulator.getAirplaneList()) == -1) {
+                                airplaneDoesNotExist = true;
+                            }
+                        }
                         //Create a new Airplane object from the given
                         Airplane plane = new Airplane(flightNumber);
 
@@ -608,21 +646,7 @@ public class ATCSim {
                     // Land the first airplane in the queue
                     case 5:
 						legitChoice = true;
-                        try {
-                            //extract the first airplane in queue
-                            Airplane extracted = simulator.heapExtractMax(simulator.getAirplaneQueue());
-
-                            //fnid the airplane in airplane list and remove it
-                            int index = simulator.findPlane(extracted.getFlightNum(), simulator.getAirplaneList());
-                            simulator.removeFromAirplaneList(index);
-
-                            //print information of the plane that has been extrated
-                            System.out.println("The following airplane has landed: ");
-                            extracted.printAirplaneInfo();
-
-                        } catch (ATCSimException error) {
-                            error.printStackTrace();
-                        }
+                        simulator.landFirstAirplane();
                         break;
 
                     //Choose an airplane to land immediately

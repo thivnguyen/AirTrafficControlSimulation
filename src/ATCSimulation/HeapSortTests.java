@@ -155,8 +155,7 @@ public class HeapSortTests {
      */
     public void maxHeapify(ArrayList<Airplane> planeList, int i) {
 
-        System.out.println();
-        System.out.println ("Entering maxHeapify() method");
+        System.out.println ("Entering/Testing maxHeapify() method on node @ index " + i + " (AC: " + planeList.get(i).getAC() + ")");
         int left = getLeft(i); //index of node to left
         if (left <= getHeapSize(planeList) - 1) {
             System.out.println("Airplane on left node (index "+ left + ") has AC value -> " + planeList.get(left).getAC());
@@ -184,7 +183,8 @@ public class HeapSortTests {
         }
         if (largest != i) {
             //swap node i with the node that has the largest value in order to move the node with a larger value up and node i down
-            System.out.println ("Swap airplane @ index " + i + " (AC: "+ planeList.get(i).getAC() + ") and airplane @ index " + largest + " (AC: "+ planeList.get(largest).getAC() +")");
+            System.out.println ("Swap airplane @ index " + i + " (AC: "+ planeList.get(i).getAC() + ") and airplane @ index " + largest + " (AC: "+
+                    planeList.get(largest).getAC() +")");
             swap(planeList, i, largest);
 
             //call maxheapify on the node that has the largest value between node, node's left node, and node's right node
@@ -205,13 +205,14 @@ public class HeapSortTests {
      */
     public ArrayList<Airplane> buildMaxHeap(ArrayList<Airplane> planeList) {
         System.out.println();
-        System.out.println ("Entering buildMaxHeap() method");
+        System.out.println ("Entering/Testing buildMaxHeap() method");
         ArrayList<Airplane> airplaneHeap = copyList(planeList);
 
         //call maxHeapify on each element in a bottom-up manner
         System.out.println ("buildMaxHeap works by calling maxHeapify on indexes from "+ (getHeapSize(airplaneHeap) / 2 - 1) + " to 0");
         for (int i = getHeapSize(airplaneHeap) / 2 - 1; i >= 0; i--) {
             System.out.println ("Calling maxHeapify for airplane at index " + i + " (AC value -> " + airplaneHeap.get(i).getAC() +")");
+            System.out.println();
             maxHeapify(airplaneHeap, i); //maxHeapify the node so that it will go to the right place in the heap
         }
         System.out.println ("Airplane Heap after calling buildMaxHeap method");
@@ -246,6 +247,7 @@ public class HeapSortTests {
                 createSublist(subList, heap, 0, i - 1);
                 //use maxheapify to restore the max-heap property
                 System.out.println ("Call maxheapify on the airplane @ index 0 (AC: "+ subList.get (0).getAC() +") to restore max heap property");
+                System.out.println();
                 maxHeapify(subList, 0);
                 System.out.println ("Heap after max-heap property has been restored on airplanes from indexes 0 to " + (i-1) + "," +
                         " pay attention to index 0 to "+ (i-1) + ". Airplanes from index " + i + " to index " + (heap.size()-1)+ " has already been sorted.");
